@@ -75,9 +75,11 @@ const client = new Client({
         clientId: "bot-seguridad",
         dataPath: path.join(__dirname, 'whatsapp-session')
     }),
+    authTimeoutMs: 180000, 
     puppeteer: {
         headless: true, 
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        timeout: 180000, 
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -86,14 +88,14 @@ const client = new Client({
             '--no-first-run',
             '--no-zygote',
             '--disable-gpu',
-            '--disable-software-rasterizer'
+            '--disable-software-rasterizer',
+            '--disable-extensions' 
         ]
     },
     webVersionCache: {
         type: 'none'
     }
 });
-
 function crearCarpetas() {
     const carpetas = [
         path.join(__dirname, 'whatsapp-session'),
