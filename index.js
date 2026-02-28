@@ -89,7 +89,6 @@ const client = new Client({
             '--disable-software-rasterizer'
         ]
     }
-    // Dejamos fuera el webVersionCache porque suele dar problemas de timeout
 });
 
 function crearCarpetas() {
@@ -4045,26 +4044,23 @@ async function enviarMensajeProgramado(programacion) {
     }
 }
 
+// Variables para guardar el estado y mostrarlo en la web
+let qrDataURL = null;
+let botConectado = false;
+
 client.on('qr', qr => {
+    // Guardamos el código QR en la variable para mostrarlo en la web
+    qrDataURL = qr;
+    
     console.clear();
     console.log('╔══════════════════════════════════════════════════════════╗');
     console.log('║                    ESCANEA EL QR                         ║');
     console.log('╠══════════════════════════════════════════════════════════╣');
-    console.log('║ 📱 Instrucciones:                                        ║');
-    console.log('║    1. Abre WhatsApp en tu teléfono                       ║');
-    console.log('║    2. Menú → WhatsApp Web                                ║');
-    console.log('║    3. Escanea el código QR                               ║');
-    console.log('║    4. ESPERA 10-20 segundos                              ║');
+    console.log('║ 🌐 ¡VE A TU PÁGINA DE RENDER PARA ESCANEARLO MÁS FÁCIL!  ║');
     console.log('╚══════════════════════════════════════════════════════════╝\n');
     
+    // Lo imprimimos en consola también por si acaso
     qrcode.generate(qr, { small: true });
-    
-    console.log('\n🔗 O puedes usar este enlace:');
-    console.log(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qr)}`);
-    
-    console.log(`\n📅 ${moment().tz(TIMEZONE).format('DD/MM/YYYY HH:mm:ss')}`);
-    console.log('📍 América/El_Salvador');
-    console.log('\n⚠️ Si no funciona después de 30 segundos, reinicia el bot.');
 });
 
 client.on('authenticated', () => {
@@ -4076,6 +4072,10 @@ client.on('auth_failure', msg => {
 });
 
 client.on('ready', async () => {
+    // Cambiamos el estado a conectado y limpiamos el QR para la web
+    botConectado = true;
+    qrDataURL = null;
+    
     console.clear();
     console.log('╔══════════════════════════════════════════════════════════╗');
     console.log('║                 ✅ BOT CONECTADO EXITOSAMENTE            ║');
@@ -4090,6 +4090,13 @@ client.on('ready', async () => {
 
 client.on('loading_screen', (percent, message) => {
     console.log(`🔄 Cargando: ${percent}% - ${message}`);
+});
+
+client.on('disconnected', (reason) => {
+    console.log('❌ Bot desconectado', reason);
+    botConectado = false;
+    qrDataURL = null;
+    client.initialize(); // Intentar reconectar automáticamente
 });
 
 function cargarProgramacionesGuardadas() {
@@ -4219,17 +4226,48 @@ process.on('SIGINT', async () => {
     process.exit(0);
 });
 // --- CONFIGURACIÓN DEL SERVIDOR WEB PARA RENDER ---
+// --- CONFIGURACIÓN DEL SERVIDOR WEB PARA MOSTRAR EL QR ---
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-    res.send('🤖 Bot Jarabito está activo y funcionando en Render!');
+    // Si ya está conectado, mostramos un mensaje de éxito
+    if (botConectado) {
+        res.send(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                <h1 style="color: green;">✅ ¡El Bot Jarabito está Conectado y Listo!</h1>
+                <p>El bot está operando normalmente en WhatsApp.</p>
+            </div>
+        `);
+    } 
+    // Si hay un QR listo, lo mostramos como imagen
+    else if (qrDataURL) {
+        res.send(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                <h1>📱 Escanea este código para iniciar el bot</h1>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrDataURL)}" alt="QR Code" style="margin: 20px; border: 2px solid black; border-radius: 10px; padding: 10px;"/>
+                <p>O haz <a href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrDataURL)}" target="_blank">clic aquí</a> para abrir el QR en grande.</p>
+                <p style="color: gray;"><i>Si el código no funciona, recarga esta página para obtener uno nuevo.</i></p>
+            </div>
+        `);
+    } 
+    // Si aún no hay QR ni está conectado, está cargando
+    else {
+        res.send(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                <h1 style="color: orange;">⏳ Inicializando WhatsApp...</h1>
+                <p>El navegador se está abriendo en el servidor. Por favor, <b>recarga esta página en 30 segundos</b>.</p>
+            </div>
+        `);
+    }
 });
 
 app.listen(PORT, () => {
-    console.log(`🌐 Servidor web iniciado en el puerto ${PORT}`);
+    console.log(`🌐 Servidor web iniciado. Visita tu página web para ver el QR.`);
 });
+// ---------------------------------------------------
 
+// Arrancar el bot
 iniciarBot().catch(error => {
     console.error('❌ ERROR CRÍTICO AL INICIAR:', error);
     console.log('\n💡 POSIBLES SOLUCIONES:');
