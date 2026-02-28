@@ -76,7 +76,7 @@ const client = new Client({
         dataPath: path.join(__dirname, 'whatsapp-session')
     }),
     puppeteer: {
-        headless: true, // o "new"
+        headless: true, 
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         args: [
             '--no-sandbox',
@@ -89,10 +89,8 @@ const client = new Client({
             '--disable-software-rasterizer'
         ]
     },
-    // 👇 ¡SOLO CAMBIAMOS ESTO! De 'remote' a 'local'
     webVersionCache: {
-        type: 'local',
-        strict: true
+        type: 'none'
     }
 });
 
