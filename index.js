@@ -76,7 +76,7 @@ const client = new Client({
         dataPath: path.join(__dirname, 'whatsapp-session')
     }),
     puppeteer: {
-        headless: true, 
+        headless: "new", 
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         args: [
             '--no-sandbox',
@@ -85,14 +85,11 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--disable-gpu'
-            // Ya NO está el single-process aquí
+            '--disable-gpu',
+            '--disable-software-rasterizer'
         ]
-    },
-    webVersionCache: {
-        type: "remote",
-        remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html"
     }
+    // Dejamos fuera el webVersionCache porque suele dar problemas de timeout
 });
 
 function crearCarpetas() {
