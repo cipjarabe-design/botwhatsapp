@@ -78,7 +78,6 @@ const client = new Client({
     puppeteer: {
         headless: true, 
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-        dumpio: true,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -86,14 +85,14 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--disable-gpu',
-            '--single-process',
-            '--disable-software-rasterizer',
-            '--mute-audio',
-            '--disable-extensions'
+            '--disable-gpu'
+            // Ya NO está el single-process aquí
         ]
+    },
+    webVersionCache: {
+        type: "remote",
+        remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html"
     }
-    
 });
 
 function crearCarpetas() {
