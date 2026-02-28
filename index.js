@@ -76,7 +76,7 @@ const client = new Client({
         dataPath: path.join(__dirname, 'whatsapp-session')
     }),
     puppeteer: {
-        headless: "new", 
+        headless: true, // o "new"
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         args: [
             '--no-sandbox',
@@ -89,10 +89,10 @@ const client = new Client({
             '--disable-software-rasterizer'
         ]
     },
-    // 👇 ¡AGREGAMOS ESTO DE NUEVO! Es vital para que pueda "leer" los mensajes
+    // 👇 ¡SOLO CAMBIAMOS ESTO! De 'remote' a 'local'
     webVersionCache: {
-        type: "remote",
-        remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html"
+        type: 'local',
+        strict: true
     }
 });
 
