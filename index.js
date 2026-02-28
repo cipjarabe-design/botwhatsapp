@@ -79,7 +79,7 @@ const client = new Client({
     puppeteer: {
         headless: true, 
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-        timeout: 180000, 
+        timeout: 180000,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -89,11 +89,13 @@ const client = new Client({
             '--no-zygote',
             '--disable-gpu',
             '--disable-software-rasterizer',
-            '--disable-extensions' 
+            '--disable-extensions',
+            '--js-flags="--max-old-space-size=256"'
         ]
     },
     webVersionCache: {
-        type: 'none'
+        type: "remote",
+        remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html"
     }
 });
 function crearCarpetas() {
@@ -4162,17 +4164,16 @@ client.on('message_create', async message => {
                 "• /menu o /menú - Mostrar menú principal\n" +
                 "• 1-10 - Seleccionar opción del menú\n" +
                 "• ayuda - Mostrar esta ayuda\n\n" +
-                "*IMPORTANTE:*\n" +
-                "Debes usar el comando /menu primero para interactuar conmigo.\n\n" +
                 "¡Estoy aquí para ayudarte! 🚀"
             );
             return;
         }
         
-        if (message.from.endsWith('@g.us')) {
-            if (!texto.startsWith('/') && !/^[1-9]$|^10$/.test(texto) && texto.toLowerCase() !== 'ayuda') {
-                return;
+        if (!message.from.endsWith('@g.us')) {
+            if (texto && texto.length > 0 && !texto.startsWith('/')) {
+                 await message.reply("👋 ¡Hola! Soy Jarabito 🤖. Para ver lo que puedo hacer, por favor escribe el comando:\n\n*/menu*");
             }
+            return;
         }
         
     } catch (error) {
